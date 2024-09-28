@@ -19,7 +19,7 @@ class PotionInventory(BaseModel):
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_update = "UPDATE global_inventory SET num_green_ml = num_green_ml - 1 WHERE num_green_ml < 10"
+        sql_update = "UPDATE global_inventory SET num_green_ml = num_green_ml-1 WHERE num_green_ml > 0"
         connection.execute(sqlalchemy.text(sql_update))  
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
