@@ -23,7 +23,7 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_to_execute = """SELECT num_green_potions AS sum_num_green_potions WHERE SUM(num_green_potions) < 10 FROM global_inventory
+        sql_to_execute = """SELECT num_green_potions - 1 AS sum_num_green_potions WHERE SUM(num_green_potions) < 10 FROM global_inventory
                             UPDATE global_inventory SET num_green_potions = sum_num_green_potions"""
         connection.execute(sqlalchemy.text(sql_to_execute))
 
@@ -43,7 +43,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     return [
         {
             "sku": "SMALL_GREEN_BARREL",
-            "quantity": result,
+            "quantity": int(result),
         }
     ]
 
