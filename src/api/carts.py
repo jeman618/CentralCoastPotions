@@ -108,12 +108,10 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
-        sql_to_execute = """SELECT gold + 50 AS sum_gold FROM global_inventory
-                            SELECT num_green_potions - 1 AS sum_num_green_potions WHERE SUM(num_green_ml) >= 0 FROM global_inventory
-                            SELECT num_green_ml - 100 AS sum_num_green_ml WHERE SUM(num_green_potions) >= 0 FROM global_inventory
-                            UPDATE global_inventory SET gold = sum_gold
-                            UPDATE global_inventory SET num_green_potions = sum_num_green_potions
-                            UPDATE global_inventory SET num_green_potions = sum_num_green_potions"""
+        sql_to_execute = """
+                            UPDATE global_inventory SET gold = gold + 50
+                            UPDATE global_inventory SET num_green_potions = num_green_potions - 1 WHERE SUM(num_green_ml) >= 0
+                            UPDATE global_inventory SET num_green_potions = num_green_ml - 100 AS sum_num_green_ml WHERE SUM(num_green_potions) >= 0"""
         result = connection.execute(sqlalchemy.text(sql_to_execute))
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}
