@@ -28,7 +28,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT num_green_ml FROM global_inventory"
+        sql_to_execute = """SELECT num_green_ml FROM global_inventory"""
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     """
     Go from barrel to bottle.
