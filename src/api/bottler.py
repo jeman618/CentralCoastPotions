@@ -19,7 +19,7 @@ class PotionInventory(BaseModel):
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_update = """SELECT num_green_ml - 500 AS sum_num_green_ml WHERE SUM(num_green_ml) > 0 FROM global_inventory
+        sql_update = """SELECT num_green_ml - 100 AS sum_num_green_ml WHERE SUM(num_green_ml) > 0 FROM global_inventory
                             UPDATE global_inventory SET num_green_ml = sum_num_green_ml"""
         connection.execute(sqlalchemy.text(sql_update))  
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
@@ -29,7 +29,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
     with db.engine.begin() as connection:
-        sql_to_execute = """SELECT num_green_ml + 500 AS sum_num_green_ml WHERE SUM(num_green_ml) >= 0 FROM global_inventory
+        sql_to_execute = """SELECT num_green_ml + 100 AS sum_num_green_ml WHERE SUM(num_green_ml) >= 0 FROM global_inventory
                             UPDATE global_inventory SET num_green_ml = sum_num_green_ml"""
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     """
