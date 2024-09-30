@@ -19,7 +19,7 @@ class PotionInventory(BaseModel):
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_update = """UPDATE global_inventory SET num_green_ml = SUM(num_green_ml - 1) WHERE SUM(num_green_ml) > 0"
+        sql_update = "SELECT num_green_ml - 1 AS sum_num_green_ml WHERE SUM(num_green_ml) > 0 FROM global_inventory"
         connection.execute(sqlalchemy.text(sql_update))  
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
