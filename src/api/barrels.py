@@ -23,7 +23,7 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_update = """UPDATE global_inventory SET num_green_potions = SUM(num_green_potions + 1) WHERE SUM(num_green_potions) < 10"
+        sql_update = "SELECT num_green_potions AS sum_num_green_potions WHERE SUM(num_green_potions) < 10 FROM global_inventory"
         connection.execute(sqlalchemy.text(sql_update))
 
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
