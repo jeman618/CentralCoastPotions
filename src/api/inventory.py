@@ -31,8 +31,8 @@ def get_capacity_plan():
     """
 
     return {
-        "potion_capacity": result1,
-        "ml_capacity": result2
+        "potion_capacity": int(result1),
+        "ml_capacity": int(result2)
         }
 
 class CapacityPurchase(BaseModel):
