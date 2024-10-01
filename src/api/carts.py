@@ -112,7 +112,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         sql_to_execute2 = "UPDATE global_inventory SET num_green_potions = num_green_potions - 1 WHERE SUM(num_green_ml) >= 0"
         sql_to_execute2 = "UPDATE SET num_green_potions = num_green_ml - 100 AS sum_num_green_ml WHERE SUM(num_green_potions) >= 0"
         result = connection.execute(sqlalchemy.text(sql_to_execute1))
-        result = connection.execute(sqlalchemy.text(sql_to_execute2)
+        result = connection.execute(sqlalchemy.text(sql_to_execute2))
         result = connection.execute(sqlalchemy.text(sql_to_execute3))
 
     return {"total_potions_bought": 1, "total_gold_paid": 50}
