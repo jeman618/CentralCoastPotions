@@ -7,7 +7,7 @@ from src import database as db
 router = APIRouter(
     prefix="/barrels",
     tags=["barrels"],
-    dependencies=[Depends(auth.get_api_key)],
+    # dependencies=[Depends(auth.get_api_key)],
 )
 
 class Barrel(BaseModel):
@@ -23,9 +23,9 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_update = """SELECT num_green_potions - 1 AS sum_num_green_potions WHERE SUM(num_green_potions) < 10 FROM global_inventory
-                        UPDATE global_inventory SET num_green_potions = sum_num_green_potions"""
-        connection.execute(sqlalchemy.text(sql_update))
+        sql_to_execute = """UPDATE global_inventory 
+                            SET num_green_potions = VALUE(quantity:int) + 1"""
+        connection.execute(sqlalchemy.text(sql_to_execute))
 
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
