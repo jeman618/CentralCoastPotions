@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/catalog/", tags=["catalog"])
 def get_catalog():
     with db.engine.begin() as connection:
-        sql_to_execute = "SELECT num_green_potions FROM global_inventory"
+        sql_to_execute = "SELECT SUM(num_green_potions) FROM global_inventory"
         result = connection.execute(sqlalchemy.text(sql_to_execute))
     """
     Each unique item combination must have only a single price.
