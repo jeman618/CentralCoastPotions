@@ -7,7 +7,7 @@ from src import database as db
 router = APIRouter(
     prefix="/barrels",
     tags=["barrels"],
-    # dependencies=[Depends(auth.get_api_key)],
+    dependencies=[Depends(auth.get_api_key)],
 )
 
 class Barrel(BaseModel):
@@ -23,8 +23,7 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     with db.engine.begin() as connection:
-        sql_to_execute = """UPDATE global_inventory 
-                            SET num_green_potions = VALUE(quantity:int) + 1"""
+        sql_to_execute =  "UPDATE global_inventory SET num_green_ml = num_green_ml - 100"
         connection.execute(sqlalchemy.text(sql_to_execute))
 
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
@@ -35,10 +34,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):  
     """ """
-    with db.engine.begin() as connection:
-        sql_to_execute = "SELECT num_green_potions FROM global_inventory"
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+    if (Barrel.ml_per_barrel >= 0):
+        with db.engine.begin() as connection:
+            sql_to_execute = "SELECT num_green_potions FROM global_inventory"
+            result = connection.execute(sqlalchemy.text(sql_to_execute))
 
+    print(int(result))
     print(wholesale_catalog)
 
     return [

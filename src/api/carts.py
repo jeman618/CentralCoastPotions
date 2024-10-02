@@ -109,7 +109,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
         sql_to_execute = """UPDATE global_inventory 
-                            SET gold = SUM(gold) + 50, 
+                            SET gold = gold + 50, 
                             num_green_potions = num_green_potions + 1,
                             num_green_ml = num_green_ml + 100
                             """
