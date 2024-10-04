@@ -20,14 +20,19 @@ def get_inventory():
 # Gets called once a day
 @router.post("/plan")
 def get_capacity_plan():
+    with db.engine.begin() as connection:
+        sql_to_execute1 = "SELECT num_green_potions FROM global_inventory"
+        result1 = connection.execute(sqlalchemy.text(sql_to_execute1))
+        sql_to_execute1 = "SELECT num_green_ml FROM global_inventory"
+        result2 = connection.execute(sqlalchemy.text(sql_to_execute2))
     """ 
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
 
     return {
-        "potion_capacity": 0,
-        "ml_capacity": 0
+        "potion_capacity": int(result1),
+        "ml_capacity": int(result2)
         }
 
 class CapacityPurchase(BaseModel):

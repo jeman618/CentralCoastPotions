@@ -4,6 +4,8 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
+import sqlalchemy
+from src import database as db
 
 router = APIRouter(
     prefix="/bottler",
@@ -23,7 +25,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                             SET num_green_potions = num_green_potions + 1"""
         connection.execute(sqlalchemy.text(sql_to_execute)) 
 
-    """ """
+    """ """ 
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     return "OK"
@@ -41,6 +43,7 @@ def get_bottle_plan():
     """
     Go from barrel to bottle.
     """
+
     for bottle in range(5):
         if green_ml_amount > 0:
             quantity += 1
