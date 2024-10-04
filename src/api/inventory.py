@@ -14,25 +14,34 @@ router = APIRouter(
 @router.get("/audit")
 def get_inventory():
     """ """
+    num_potions_sql = "SELECT num_green_potions FROM global_inventory"
+    num_green_ml_sql = "SELECT num_green_ml FROM global_inventory"
+    gold_sql = "SELECT gold FROM global_inventory"
+                        
+    with db.engine.begin() as connection:
+        num_potions = connection.execute(sqlalchemy.text(num_potions_sql)).scalar()
+        num_green_ml = connection.execute(sqlalchemy.text(num_green_ml_sql)).scalar()
+        gold = connection.execute(sqlalchemy.text(gold_sql)).scalar()
     
-    return {"number_of_potions": 0, "ml_in_barrels": 0, "gold": 0}
+    return {"number_of_potions": num_potions, "ml_in_barrels": num_green_ml, "gold": gold}
 
 # Gets called once a day
 @router.post("/plan")
 def get_capacity_plan():
+
+    sql_to_execute1 = "SELECT num_green_potions FROM global_inventory"
+    sql_to_execute2 = "SELECT num_green_ml FROM global_inventory"
     with db.engine.begin() as connection:
-        sql_to_execute1 = "SELECT num_green_potions FROM global_inventory"
-        result1 = connection.execute(sqlalchemy.text(sql_to_execute1))
-        sql_to_execute1 = "SELECT num_green_ml FROM global_inventory"
-        result2 = connection.execute(sqlalchemy.text(sql_to_execute2))
+        result1 = connection.execute(sqlalchemy.text(sql_to_execute1)).scalar()
+        result2 = connection.execute(sqlalchemy.text(sql_to_execute2)).scalar()
     """ 
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
 
     return {
-        "potion_capacity": int(result1),
-        "ml_capacity": int(result2)
+        "potion_capacity": result1,
+        "ml_capacity": result2
         }
 
 class CapacityPurchase(BaseModel):
