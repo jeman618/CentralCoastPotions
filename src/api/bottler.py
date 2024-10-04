@@ -21,7 +21,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     with db.engine.begin() as connection:
         sql_to_execute = """UPDATE global_inventory 
                             SET num_green_potions = num_green_potions + 1"""
-        connection.execute(sqlalchemy.text(sql_to_execute))  
+        connection.execute(sqlalchemy.text(sql_to_execute)) 
 
     """ """
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
@@ -31,12 +31,19 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
 
+    quantity = 0
+    num_potions = "UPDATE global_inventory SET num_green_potions = num_green_potions - 1"
+    green_ml = "SELECT num_green_ml FROM global_inventory"
+
     with db.engine.begin() as connection:
-        sql_to_execute = "UPDATE global_inventory SET num_green_potions = num_green_potions + 1"
-        result = connection.execute(sqlalchemy.text(sql_to_execute))
+        update_num_potions = connection.execute(sqlalchemy.text(num_potions))
+        green_ml_amount = connection.execute(sqlalchemy.text(green_ml)).scalar()
     """
     Go from barrel to bottle.
     """
+    for bottle in range(5):
+        if green_ml_amount > 0:
+            quantity += 1
 
     # Each bottle has a quantity of what proportion of red, blue, and
     # green potion to add.
@@ -47,7 +54,7 @@ def get_bottle_plan():
     return [
             {
                 "potion_type": [0, 100, 0, 0],
-                "quantity": int(result),
+                "quantity": quantity,
             }
         ]
 
