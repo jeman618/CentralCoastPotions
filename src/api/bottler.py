@@ -44,7 +44,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 potion.potion_type = [0, 100, 0]
                 potion.quantity = int(red_ml/100)
                 ml_amount =int(potion.quantity * 100)
-            else:
+            elif (ml_total[2] < ml_total[0] and ml_total[2] < ml_total[1]):
                 potions = "UPDATE global_inventory SET num_blue_potions = (num_blue_potions + :p_amount)"
                 ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml - :ml_amount)"
                 potion.potion_type = [0, 0, 100]
@@ -82,7 +82,7 @@ def get_bottle_plan():
             elif(all_ml[1] < all_ml[0] and all_ml[1] < all_ml[2]):
                 potion_type = [0, 100, 0]
                 num_p = int(num_red/100)
-            else:
+            elif (all_ml[2] < all_ml[0] and all_ml[2] < all_ml[1]):
                 potion_type = [0, 0, 100]
                 num_p = int(num_blue/100)
     """
