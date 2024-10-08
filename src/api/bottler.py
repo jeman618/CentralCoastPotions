@@ -4,8 +4,6 @@ from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
 from src import database as db
-import sqlalchemy
-from src import database as db
 
 router = APIRouter(
     prefix="/bottler",
@@ -20,10 +18,42 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
 
+    ml_g = "SELECT num_green_ml FROM global_inventory"
+    ml_r = "SELECT num_red_ml FROM global_inventory"
+    ml_b = "SELECT num_blue_ml FROM global_inventory"
+
     with db.engine.begin() as connection:
-        sql_to_execute = """UPDATE global_inventory 
-                            SET num_green_potions = num_green_potions + 1"""
-        connection.execute(sqlalchemy.text(sql_to_execute)) 
+            green_ml = connection.execute(sqlalchemy.text(ml_g)).scalar()
+            red_ml = connection.execute(sqlalchemy.text(ml_r)).scalar()
+            blue_ml = connection.execute(sqlalchemy.text(ml_b)).scalar()
+
+    ml_total = [green_ml, red_ml, blue_ml]
+
+    print(potions_delivered)
+    for potion in potions_delivered:
+        if (sum(ml_total) > 0):
+            if (ml_total[0] < ml_total[1] and ml_total[0] < ml_total[2]):
+                potions = "UPDATE global_inventory SET num_green_potions = (num_green_potions + :p_amount)"
+                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml - :ml_amount)"
+                potion.potion_type = [100, 0, 0]
+                potion.quantity = int(green_ml/100)
+                ml_amount =int(potion.quantity * 100)
+            elif(ml_total[1] < ml_total[0] and ml_total[1] < ml_total[2]):
+                potions = "UPDATE global_inventory SET num_red_potions = (num_red_potions + :p_amount)"
+                ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml - :ml_amount)"
+                potion.potion_type = [0, 100, 0]
+                potion.quantity = int(red_ml/100)
+                ml_amount =int(potion.quantity * 100)
+            else:
+                potions = "UPDATE global_inventory SET num_blue_potions = (num_blue_potions + :p_amount)"
+                ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml - :ml_amount)"
+                potion.potion_type = [0, 0, 100]
+                potion.quantity = int(blue_ml/100)
+                ml_amount =int(potion.quantity * 100)
+    
+    with db.engine.begin() as connection:
+            ml_update = connection.execute(sqlalchemy.text(ml),{"ml_amount": ml_amount})
+            potions_update = connection.execute(sqlalchemy.text(potions),{"p_amount": potion.quantity})
 
     """ """ 
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
@@ -33,21 +63,34 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
 
-    quantity = 0
-    num_potions = "UPDATE global_inventory SET num_green_potions = num_green_potions - 1"
-    green_ml = "SELECT num_green_ml FROM global_inventory"
+    ml_g = "SELECT num_green_ml FROM global_inventory"
+    ml_r = "SELECT num_red_ml FROM global_inventory"
+    ml_b = "SELECT num_blue_ml FROM global_inventory"
+
 
     with db.engine.begin() as connection:
-        update_num_potions = connection.execute(sqlalchemy.text(num_potions))
-        green_ml_amount = connection.execute(sqlalchemy.text(green_ml)).scalar()
+        num_green = connection.execute(sqlalchemy.text(ml_g)).scalar()
+        num_red = connection.execute(sqlalchemy.text(ml_r)).scalar()
+        num_blue = connection.execute(sqlalchemy.text(ml_b)).scalar()
+
+    all_ml = [num_green, num_red, num_blue]
+
+    if (sum(all_ml) > 0):
+            if (all_ml[0] < all_ml[1] and all_ml[0] < all_ml[2]):
+                potion_type = [100, 0, 0]
+                num_p = int(num_green/100)
+            elif(all_ml[1] < all_ml[0] and all_ml[1] < all_ml[2]):
+                potion_type = [0, 100, 0]
+                num_p = int(num_red/100)
+            else:
+                potion_type = [0, 0, 100]
+                num_p = int(num_blue/100)
     """
     Go from barrel to bottle.
     """
-
-    for bottle in range(5):
-        if green_ml_amount > 0:
+    quantity = 0
+    for bottle in range(num_p):
             quantity += 1
-
     # Each bottle has a quantity of what proportion of red, blue, and
     # green potion to add.
     # Expressed in integers from 1 to 100 that must sum up to 100.
@@ -56,7 +99,7 @@ def get_bottle_plan():
 
     return [
             {
-                "potion_type": [0, 100, 0, 0],
+                "potion_type": potion_type,
                 "quantity": quantity,
             }
         ]

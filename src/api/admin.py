@@ -14,7 +14,7 @@ router = APIRouter(
 def reset():
 
     reset = """UPDATE global_inventory SET gold = 100,
-                    num_green_potions =  0
+                    num_green_potions = 0,
                     num_green_ml = 0"""
     with db.engine.begin() as connection:
         result = connection.execute(sqlalchemy.text(reset))
