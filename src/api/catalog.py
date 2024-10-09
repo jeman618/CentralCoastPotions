@@ -20,17 +20,20 @@ def get_catalog():
 
     catalog = []
     if g_p > 0:
-        catalog.append({"sku": "GREEN_POTION_0", "name": "green potion", "quantity": g_p,
+        catalog.append({"sku": "RED_POTION_0", "name": "red potion", "quantity": g_p,
                 "price": 50, "potion_type": [100, 0, 0],
             })
     if r_p > 0:
-        catalog.append({"sku": "RED_POTION_0", "name": "red potion", "quantity": r_p,
+        catalog.append({"sku": "GREEN_POTION_0", "name": "green potion", "quantity": r_p,
                 "price": 50, "potion_type": [0, 100, 0],
             })
     if b_p > 0:
         catalog.append({"sku": "BLUE_POTION_0", "name": "blue potion", "quantity": b_p,
                 "price": 50, "potion_type": [0, 0, 100],
             })
+    if g_p == 0 and r_p == 0 and b_p == 0:
+        catalog.append({"sku": "", "name": "", "quantity": 1,
+                "price": 1, "potion_type": [33, 33, 34]})
     """
     Each unique item combination must have only a single price.
     """

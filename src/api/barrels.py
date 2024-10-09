@@ -39,21 +39,21 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
         potion = [num_green, num_red, num_blue]
 
-        if (potion[0] < potion[1] and potion[0] < potion[2]):
-                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
-                barrels.sku = "GREEN_SMALL_BARREL"
-                barrels.potion_type = [100, 0, 0]
-        elif(potion[1] < potion[0] and potion[1] < potion[2]):
+        if (min(potion) == num_red):
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
                 barrels.sku = "RED_SMALL_BARREL"
+                barrels.potion_type = [100, 0, 0]
+        elif(min(potion) == num_green):
+                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
+                barrels.sku = "GREEN_SMALL_BARREL"
                 barrels.potion_type = [0, 100, 0]
-        elif(potion[2] < potion[0] and potion[2] < potion[1]):
+        elif(min(potion) == num_blue):
                 ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml + :mls)"
                 barrels.sku = "BLUE_SMALL_BARREL"
                 barrels.potion_type = [0, 0, 100]
         else:
-                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
-                barrels.sku = "GREEN_SMALL_BARREL"
+                ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
+                barrels.sku = "RED_SMALL_BARREL"
                 barrels.potion_type = [100, 0, 0]
                 
         barrels.ml_per_barrel = 500
@@ -90,17 +90,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     for barrel in wholesale_catalog:
 
         if (sum(all_potions) < 10 and gold_amount > 0):
-            if (all_potions[0] < all_potions[1] and all_potions[0] < all_potions[2]):
-                barrel.sku = "GREEN_SMALL_BARREL"
-                barrel.potion_type = [100, 0, 0]
-            elif(all_potions[1] < all_potions[0] and all_potions[1] < all_potions[2]):
+            if (min(all_potions) == num_red):
                 barrel.sku = "RED_SMALL_BARREL"
+                barrel.potion_type = [100, 0, 0]
+            elif(min(all_potions) == num_green):
+                barrel.sku = "GREEN_SMALL_BARREL"
                 barrel.potion_type = [0, 100, 0]
-            elif(all_potions[2] < all_potions[0] and all_potions[2] < all_potions[1]):
+            elif(min(all_potions) == num_blue):
                 barrel.sku = "BLUE_SMALL_BARREL"
                 barrel.potion_type = [0, 0, 100]
             else:
-                barrel.sku = "GREEN_SMALL_BARREL"
+                barrel.sku = "RED_SMALL_BARREL"
                 barrel.potion_type = [100, 0, 0]
             
             barrel.ml_per_barrel = 500

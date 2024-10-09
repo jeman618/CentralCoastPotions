@@ -32,29 +32,29 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     print(potions_delivered)
     for potion in potions_delivered:
         if (sum(ml_total) > 0):
-            if (max(ml_total) == green_ml):
-                potions = "UPDATE global_inventory SET num_green_potions = (num_green_potions + :p_amount)"
-                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml - :ml_amount)"
-                potion.potion_type = [100, 0, 0]
-                potion.quantity = int(green_ml/100)
-                ml_amount =int(potion.quantity * 100)
-            elif(max(ml_total) == red_ml):
+            if (max(ml_total) == red_ml):
                 potions = "UPDATE global_inventory SET num_red_potions = (num_red_potions + :p_amount)"
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml - :ml_amount)"
-                potion.potion_type = [0, 100, 0]
+                potion.potion_type = [100, 0, 0]
                 potion.quantity = int(red_ml/100)
                 ml_amount =int(potion.quantity * 100)
-            elif (max(ml_total) == green_ml):
+            elif(max(ml_total) == green_ml):
+                potions = "UPDATE global_inventory SET num_green_potions = (num_green_potions + :p_amount)"
+                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml - :ml_amount)"
+                potion.potion_type = [0, 100, 0]
+                potion.quantity = int(green_ml/100)
+                ml_amount =int(potion.quantity * 100)
+            elif (max(ml_total) == blue_ml):
                 potions = "UPDATE global_inventory SET num_blue_potions = (num_blue_potions + :p_amount)"
                 ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml - :ml_amount)"
                 potion.potion_type = [0, 0, 100]
                 potion.quantity = int(blue_ml/100)
                 ml_amount =int(potion.quantity * 100)
             else:
-                potions = "UPDATE global_inventory SET num_green_potions = (num_green_potions + :p_amount)"
-                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml - :ml_amount)"
+                potions = "UPDATE global_inventory SET num_red_potions = (num_red_potions + :p_amount)"
+                ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml - :ml_amount)"
                 potion.potion_type = [100, 0, 0]
-                potion.quantity = int(green_ml/100)
+                potion.quantity = int(red_ml/100)
                 ml_amount =int(potion.quantity * 100)
     
     with db.engine.begin() as connection:
@@ -84,10 +84,10 @@ def get_bottle_plan():
     num_p = 0
 
     if (sum(all_ml) > 0):
-            if (max(all_ml) == num_green):
-                potion_type = [100, 0, 0]
+            if (max(all_ml) == num_red):
+                potion_type = [200, 0, 0]
                 num_p = int(num_green/100)
-            elif(max(all_ml) == num_red):
+            elif(max(all_ml) == num_green):
                 potion_type = [0, 100, 0]
                 num_p = int(num_red/100)
             elif (max(all_ml) == num_blue):
