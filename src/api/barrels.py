@@ -47,10 +47,14 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
                 barrels.sku = "RED_SMALL_BARREL"
                 barrels.potion_type = [0, 100, 0]
-        else:
+        elif(potion[2] < potion[0] and potion[2] < potion[1]):
                 ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml + :mls)"
                 barrels.sku = "BLUE_SMALL_BARREL"
                 barrels.potion_type = [0, 0, 100]
+        else:
+                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
+                barrels.sku = "GREEN_SMALL_BARREL"
+                barrels.potion_type = [100, 0, 0]
                 
         barrels.ml_per_barrel = 500
         barrels.quantity += 1
@@ -92,9 +96,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             elif(all_potions[1] < all_potions[0] and all_potions[1] < all_potions[2]):
                 barrel.sku = "RED_SMALL_BARREL"
                 barrel.potion_type = [0, 100, 0]
-            else:
+            elif(all_potions[2] < all_potions[0] and all_potions[2] < all_potions[1]):
                 barrel.sku = "BLUE_SMALL_BARREL"
                 barrel.potion_type = [0, 0, 100]
+            else:
+                barrel.sku = "GREEN_SMALL_BARREL"
+                barrel.potion_type = [100, 0, 0]
             
             barrel.ml_per_barrel = 500
             barrel.quantity += 1
