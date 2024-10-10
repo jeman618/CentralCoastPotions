@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
+import logging
 import sqlalchemy
 from src import database as db
 
@@ -9,6 +10,8 @@ router = APIRouter(
     tags=["barrels"],
     dependencies=[Depends(auth.get_api_key)],
 )
+
+logger = logging.getLogger("barrels")
 
 class Barrel(BaseModel):
     sku: str
@@ -22,6 +25,7 @@ class Barrel(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
+    print(barrels_delivered)
 
     gold = "UPDATE global_inventory SET gold = gold - :price"
     potions_g = "SELECT num_green_potions FROM global_inventory"
@@ -41,24 +45,12 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
         if (min(potion) == num_red):
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
-                barrels.sku = "RED_SMALL_BARREL"
-                barrels.potion_type = [100, 0, 0]
         elif(min(potion) == num_green):
                 ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
-                barrels.sku = "GREEN_SMALL_BARREL"
-                barrels.potion_type = [0, 100, 0]
         elif(min(potion) == num_blue):
                 ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml + :mls)"
-                barrels.sku = "BLUE_SMALL_BARREL"
-                barrels.potion_type = [0, 0, 100]
         else:
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
-                barrels.sku = "RED_SMALL_BARREL"
-                barrels.potion_type = [100, 0, 0]
-                
-        barrels.ml_per_barrel = 500
-        barrels.quantity += 1
-        barrels.price = 100 * barrels.quantity
 
         with db.engine.begin() as connection:
             ml_update = connection.execute(sqlalchemy.text(ml),
@@ -91,22 +83,18 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
         if (sum(all_potions) < 10 and gold_amount > 0):
             if (min(all_potions) == num_red):
-                barrel.sku = "RED_SMALL_BARREL"
+                
                 barrel.potion_type = [100, 0, 0]
             elif(min(all_potions) == num_green):
-                barrel.sku = "GREEN_SMALL_BARREL"
+                
                 barrel.potion_type = [0, 100, 0]
             elif(min(all_potions) == num_blue):
-                barrel.sku = "BLUE_SMALL_BARREL"
+               
                 barrel.potion_type = [0, 0, 100]
             else:
-                barrel.sku = "RED_SMALL_BARREL"
+                
                 barrel.potion_type = [100, 0, 0]
             
-            barrel.ml_per_barrel = 500
-            barrel.quantity += 1
-            barrel.price = 100 * barrel.quantity
-
     return [{"sku": barrel.sku,
             "ml_per_barrel": barrel.ml_per_barrel,
             "potion_type": barrel.potion_type,
