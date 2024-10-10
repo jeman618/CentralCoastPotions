@@ -31,6 +31,9 @@ def get_catalog():
         catalog.append({"sku": "BLUE_POTION_0", "name": "blue potion", "quantity": b_p,
                 "price": 50, "potion_type": [0, 0, 100],
             })
+    if g_p == 0 and r_p == 0 and b_p == 0:
+        print("no potions available")
+        return []
     """
     Each unique item combination must have only a single price.
     """
