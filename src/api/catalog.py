@@ -37,9 +37,7 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
-    if len(catalog) == 0:
-        print("No potions in inventory to list in catalog")
-        return []
+    
     return catalog
         
 
