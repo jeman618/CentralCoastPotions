@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from src.api import auth
-import logging
 import sqlalchemy
 from src import database as db
 
@@ -10,8 +9,6 @@ router = APIRouter(
     tags=["barrels"],
     dependencies=[Depends(auth.get_api_key)],
 )
-
-logger = logging.getLogger("barrels")
 
 class Barrel(BaseModel):
     sku: str
@@ -77,11 +74,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_blue = connection.execute(sqlalchemy.text(potions_b)).scalar()
 
     gold_amount = result1
+    price = 0
     all_potions = [num_green, num_red, num_blue]
+    plan = []
 
     for barrel in wholesale_catalog:
 
-        if (sum(all_potions) < 10 and barrel.price <= gold_amount):
+        if (sum(all_potions) < 10 and barrel.price <= gold_amount and gold_amount > 0):
             if (min(all_potions) == num_red):
                 barrel.potion_type = [100, 0, 0, 0]
             elif(min(all_potions) == num_green):
@@ -90,13 +89,21 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrel.potion_type = [0, 0, 100, 0]
             else:
                 barrel.potion_type = [100, 0, 0, 0]
-            barrel.quantity += 1
-            
-    return [{"sku": barrel.sku,
+            price += barrel.price
+
+
+
+            plan.append({"sku": barrel.sku,
             "ml_per_barrel": barrel.ml_per_barrel,
             "potion_type": barrel.potion_type,
             "quantity": barrel.quantity,
-            "price": barrel.price}]
+            "price": barrel.price})
+    
+    update = "UPDATE global_inventory SET gold = gold - :price"
+    with db.engine.begin() as connection:
+                result = connection.execute(sqlalchemy.text(update),{"price": price})
+            
+    return plan
         
     
 
