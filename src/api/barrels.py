@@ -24,7 +24,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     print(barrels_delivered)
 
-    gold = "UPDATE global_inventory SET gold = gold - :price"
     potions_g = "SELECT num_green_potions FROM global_inventory"
     potions_r = "SELECT num_red_potions FROM global_inventory"
     potions_b = "SELECT num_blue_potions FROM global_inventory"
@@ -50,9 +49,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
 
         with db.engine.begin() as connection:
-            ml_update = connection.execute(sqlalchemy.text(ml),
-                                          {"mls": barrels.ml_per_barrel})
-            gold_update = connection.execute(sqlalchemy.text(gold),{"price": barrels.price})
+            ml_update = connection.execute(sqlalchemy.text(ml), {"mls": barrels.ml_per_barrel})
 
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
@@ -62,20 +59,19 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]): 
 
-    gold = "SELECT gold FROM global_inventory"
+    gold_SQL = "SELECT gold FROM global_inventory"
     potions_g = "SELECT num_green_potions FROM global_inventory"
     potions_r = "SELECT num_red_potions FROM global_inventory"
     potions_b = "SELECT num_blue_potions FROM global_inventory"
 
     with db.engine.begin() as connection:
-                result1 = connection.execute(sqlalchemy.text(gold)).scalar()
+                gold = connection.execute(sqlalchemy.text(gold)).scalar()
                 num_green = connection.execute(sqlalchemy.text(potions_g)).scalar()
                 num_red = connection.execute(sqlalchemy.text(potions_r)).scalar()
                 num_blue = connection.execute(sqlalchemy.text(potions_b)).scalar()
 
-    gold_amount = result1
-    price = 0
-    all_potions = [num_green, num_red, num_blue]
+    gold_amount = gold
+    all_potions = [num_green, num_red, num_blue, 0]
     plan = []
 
     for barrel in wholesale_catalog:
@@ -89,9 +85,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrel.potion_type = [0, 0, 100, 0]
             else:
                 barrel.potion_type = [100, 0, 0, 0]
-            price += barrel.price
-
-
 
             plan.append({"sku": barrel.sku,
             "ml_per_barrel": barrel.ml_per_barrel,
@@ -101,7 +94,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     
     update = "UPDATE global_inventory SET gold = gold - :price"
     with db.engine.begin() as connection:
-                result = connection.execute(sqlalchemy.text(update),{"price": price})
+                result = connection.execute(sqlalchemy.text(update),{"price": barrel.price})
             
     return plan
         
