@@ -28,10 +28,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             blue_ml = connection.execute(sqlalchemy.text(ml_b)).scalar()
 
     ml_total = [green_ml, red_ml, blue_ml]
+    ml_amount = 0
 
     print(potions_delivered)
     for potion in potions_delivered:
-        potion.quantity += 1
         if (sum(ml_total) > 0):
             if (max(ml_total) == red_ml):
                 potions = "UPDATE global_inventory SET num_red_potions = (num_red_potions + :p_amount)"
@@ -50,7 +50,8 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml - :ml_amount)"
                 ml_amount =int(potion.quantity * 100)
     
-    with db.engine.begin() as connection:
+    if potion.quantity > 0:
+        with db.engine.begin() as connection:
             ml_update = connection.execute(sqlalchemy.text(ml),{"ml_amount": ml_amount})
             potions_update = connection.execute(sqlalchemy.text(potions),{"p_amount": potion.quantity})
 
@@ -75,29 +76,28 @@ def get_bottle_plan():
     all_ml = [num_green, num_red, num_blue, 0]
     potion_type = []
     num_p = 0
-    plan = []
-
-    if (sum(all_ml) > 0):
-            if (max(all_ml) == num_red):
-                
-                potion_type = [100, 0, 0]
-                num_p = int(num_green/100)
-            elif(max(all_ml) == num_green):
-                potion_type = [0, 100, 0]
-                num_p = int(num_red/100)
-            elif (max(all_ml) == num_blue):
-                potion_type = [0, 0, 100]
-                num_p = int(num_blue/100)
-            else:
-                potion_type = [100, 0, 0]
-                num_p = int(num_red/100)
     """
     Go from barrel to bottle.
     """
     List: list[PotionInventory]
     List = [PotionInventory(potion_type = potion_type, quantity = 0)]
+    plan = []
     quantity = 0
     for bottle in List:
+
+        if (sum(all_ml) > 0):
+            if (max(all_ml) == num_red):
+                potion_type = [100, 0, 0, 0]
+                num_p = int(num_green/100)
+            elif(max(all_ml) == num_green):
+                potion_type = [0, 100, 0, 0]
+                num_p = int(num_red/100)
+            elif (max(all_ml) == num_blue):
+                potion_type = [0, 0, 100, 0]
+                num_p = int(num_blue/100)
+            else:
+                potion_type = [100, 0, 0, 0]
+                num_p = int(num_red/100)
             bottle.quantity += num_p
             plan.append({
                 "potion_type": bottle.potion_type,
