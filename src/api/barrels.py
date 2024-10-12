@@ -73,10 +73,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     gold_amount = gold
     all_potions = [num_green, num_red, num_blue, 0]
     plan = []
+    total_price = 0
 
     for barrel in wholesale_catalog:
-
-        if (sum(all_potions) < 10 and barrel.price <= 60 and gold_amount > 0):
+        total_price += barrel.price * barrel.quantity
+        if (sum(all_potions) < 10 and total_price <= gold_amount and gold_amount > 0):
             if (min(all_potions) == num_red):
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
                 barrel.potion_type = [100, 0, 0, 0]
