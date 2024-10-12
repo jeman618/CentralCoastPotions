@@ -96,8 +96,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "quantity": barrel.quantity,
             "price": barrel.price})
     
-    update = "UPDATE global_inventory SET gold = gold - :price"
-    with db.engine.begin() as connection:
+    if (sum(all_potions) < 10 and barrel.price <= 60 and gold_amount > 0):
+        update = "UPDATE global_inventory SET gold = gold - :price"
+        with db.engine.begin() as connection:
                 ml_update = connection.execute(sqlalchemy.text(ml),{"mls": barrel.ml_per_barrel})
                 gold_update = connection.execute(sqlalchemy.text(update),{"price": barrel.price})
     print(plan)
