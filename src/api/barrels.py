@@ -65,7 +65,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     potions_b = "SELECT num_blue_potions FROM global_inventory"
 
     with db.engine.begin() as connection:
-                gold = connection.execute(sqlalchemy.text(gold)).scalar()
+                gold = connection.execute(sqlalchemy.text(gold_SQL)).scalar()
                 num_green = connection.execute(sqlalchemy.text(potions_g)).scalar()
                 num_red = connection.execute(sqlalchemy.text(potions_r)).scalar()
                 num_blue = connection.execute(sqlalchemy.text(potions_b)).scalar()
