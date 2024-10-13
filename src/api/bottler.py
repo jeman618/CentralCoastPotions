@@ -40,6 +40,7 @@ def get_bottle_plan():
     potion_type = []
     quantity = 0
     num_p = 0
+    ml = ""
     """
     Go from barrel to bottle.
     """
