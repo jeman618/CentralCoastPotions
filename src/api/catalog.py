@@ -19,12 +19,12 @@ def get_catalog():
         b_p = connection.execute(sqlalchemy.text(b_potions)).scalar()
 
     catalog = []
-    if g_p > 0:
-        catalog.append({"sku": "RED_POTION_0", "name": "red potion", "quantity": g_p,
+    if r_p > 0:
+        catalog.append({"sku": "RED_POTION_0", "name": "red potion", "quantity": r_p,
                 "price": 50, "potion_type": [100, 0, 0, 0],
             })
-    if r_p > 0:
-        catalog.append({"sku": "GREEN_POTION_0", "name": "green potion", "quantity": r_p,
+    if g_p > 0:
+        catalog.append({"sku": "GREEN_POTION_0", "name": "green potion", "quantity": g_p,
                 "price": 50, "potion_type": [0, 100, 0, 0],
             })
     if b_p > 0:

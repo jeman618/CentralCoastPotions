@@ -74,22 +74,30 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     all_potions = [num_green, num_red, num_blue, 0]
     plan = []
     total_price = 0
-    ml = ""
+    total_quantity = 0
+    ml_red = 0
+    ml_green = 0
+    ml_blue = 0
 
     for barrel in wholesale_catalog:
-        if (sum(all_potions) < 10 and (gold_amount - barrel.price) >= 0 and gold_amount > 0):
+
+        if (sum(all_potions) < 10 and (gold_amount - (barrel.price * barrel.quantity)) >= 0 and gold_amount > 0):
+            total_price += barrel.price
+            total_quantity += barrel.quantity
+            gold_amount -= (total_price * total_quantity)
+
             if (min(all_potions) == num_red):
-                ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
                 barrel.potion_type = [100, 0, 0, 0]
+                ml_red += barrel.ml_per_barrel
             elif(min(all_potions) == num_green):
-                ml = "UPDATE global_inventory SET num_green_ml = (num_green_ml + :mls)"
                 barrel.potion_type = [0, 100, 0, 0]
+                ml_green = barrel.ml_per_barrel
             elif(min(all_potions) == num_blue):
                 barrel.potion_type = [0, 0, 100, 0]
-                ml = "UPDATE global_inventory SET num_blue_ml = (num_blue_ml + :mls)"
+                ml_blue += barrel.ml_per_barrel
             else:
                 barrel.potion_type = [100, 0, 0, 0]
-                ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
+                ml_red += barrel.ml_per_barrel
 
             plan.append({"sku": barrel.sku,
             "ml_per_barrel": barrel.ml_per_barrel,
@@ -97,12 +105,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "quantity": barrel.quantity,
             "price": barrel.price})
     
-    if (sum(all_potions) < 10 and barrel.price <= 60 and gold_amount > 0):
-        ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml + :mls)"
-        update = "UPDATE global_inventory SET gold = gold - :price"
+    if (sum(all_potions) < 10 and (gold_amount - (barrel.price * barrel.quantity)) <= 0 and gold_amount > 0):
+        ml_update = """UPDATE global_inventory SET 
+                        num_red_ml = num_red_ml + :red,
+                        num_green_ml = num_green_ml + :green, 
+                        num_blue_ml = num_blue_ml + :blue"""
+        gold_update = "UPDATE global_inventory SET gold = gold - :price"
         with db.engine.begin() as connection:
-                ml_update = connection.execute(sqlalchemy.text(ml),{"mls": barrel.ml_per_barrel})
-                gold_update = connection.execute(sqlalchemy.text(update),{"price": barrel.price})
+                new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue})
+                new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price * total_quantity})
     print(plan)
             
     return plan
