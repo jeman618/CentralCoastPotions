@@ -74,6 +74,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     all_potions = [num_green, num_red, num_blue, 0]
     plan = []
     total_price = 0
+    ml = ""
 
     for barrel in wholesale_catalog:
         total_price += barrel.price * barrel.quantity
