@@ -52,13 +52,13 @@ def get_capacity_plan():
         num_p_g = connection.execute(sqlalchemy.text(num_potions_g)).scalar()
         num_p_r = connection.execute(sqlalchemy.text(num_potions_r)).scalar()
         num_p_b = connection.execute(sqlalchemy.text(num_potions_b)).scalar()
-        num_mili_g = connection.execute(sqlalchemy.text(num_ml_g)).scalar()
-        num_mili_r = connection.execute(sqlalchemy.text(num_ml_r)).scalar()
-        num_mili_b = connection.execute(sqlalchemy.text(num_ml_b)).scalar()
+        num_mil_g = connection.execute(sqlalchemy.text(num_ml_g)).scalar()
+        num_mil_r = connection.execute(sqlalchemy.text(num_ml_r)).scalar()
+        num_mil_b = connection.execute(sqlalchemy.text(num_ml_b)).scalar()
         gold = connection.execute(sqlalchemy.text(gold_sql)).scalar()
 
         total_p = num_p_g + num_p_r + num_p_b
-        total_ml = num_mili_g + num_mili_r + num_mili_b
+        total_ml = num_mil_g + num_mil_r + num_mil_b
 
         potion_cap = 0
         ml_cap = 0
