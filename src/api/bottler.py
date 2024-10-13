@@ -69,6 +69,7 @@ def get_bottle_plan():
                 ml = "UPDATE global_inventory SET num_red_ml = (num_red_ml - :ml_amount)"
                 bottle.potion_type = [100, 0, 0, 0]
                 num_p = int(num_red/100)
+            bottle.quantity += 1
 
             plan.append({
                 "potion_type": bottle.potion_type,
