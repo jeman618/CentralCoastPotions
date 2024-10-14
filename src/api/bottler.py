@@ -26,14 +26,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
 
-    ml_g = "SELECT SUM(num_green_ml) FROM global_inventory"
-    ml_r = "SELECT SUM(num_red_ml) FROM global_inventory"
-    ml_b = "SELECT SUM(num_blue_ml) FROM global_inventory"
+    ml_r = "SELECT num_red_ml FROM global_inventory"
+    ml_g = "SELECT num_green_ml FROM global_inventory"
+    ml_b = "SELECT num_blue_ml FROM global_inventory"
 
 
     with db.engine.begin() as connection:
-        num_green = connection.execute(sqlalchemy.text(ml_g)).scalar()
         num_red = connection.execute(sqlalchemy.text(ml_r)).scalar()
+        num_green = connection.execute(sqlalchemy.text(ml_g)).scalar()
         num_blue = connection.execute(sqlalchemy.text(ml_b)).scalar()
 
     all_ml = [num_red, num_green, num_blue, 0]

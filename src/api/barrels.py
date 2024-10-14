@@ -81,11 +81,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     for barrel in wholesale_catalog:
 
-        if (sum(all_potions) < 10 and (gold_amount - (barrel.price * barrel.quantity)) >= 0 and gold_amount > 0):
-            total_price += barrel.price
-            total_quantity += barrel.quantity
-            gold_amount -= (total_price * total_quantity)
+        total_price += barrel.price * barrel.quantity
+        total_quantity += barrel.quantity
+        gold_amount -= (total_price * total_quantity)
 
+
+        if (sum(all_potions) < 10 and (gold_amount - (total_price)) >= 0 and gold_amount > 0):
+            
             if (min(all_potions) == num_red):
                 barrel.potion_type = [100, 0, 0, 0]
                 ml_red += barrel.ml_per_barrel
@@ -105,15 +107,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             "quantity": barrel.quantity,
             "price": barrel.price})
     
-    if (sum(all_potions) < 10 and (gold_amount - (barrel.price * barrel.quantity)) <= 0 and gold_amount > 0):
-        ml_update = """UPDATE global_inventory SET 
+    ml_update = """UPDATE global_inventory SET 
                         num_red_ml = num_red_ml + :red,
                         num_green_ml = num_green_ml + :green, 
                         num_blue_ml = num_blue_ml + :blue"""
-        gold_update = "UPDATE global_inventory SET gold = gold - :price"
-        with db.engine.begin() as connection:
-                new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue})
-                new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price * total_quantity})
+    gold_update = "UPDATE global_inventory SET gold = gold - :price"
+    with db.engine.begin() as connection:
+            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue})
+            new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price * total_quantity})
+            
     print(plan)
             
     return plan
