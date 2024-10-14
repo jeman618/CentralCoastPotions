@@ -16,6 +16,7 @@ class Timestamp(BaseModel):
 
 @router.post("/current_time")
 def post_time(timestamp: Timestamp):
+    print(timestamp)
     """
     Share current time.
     """
