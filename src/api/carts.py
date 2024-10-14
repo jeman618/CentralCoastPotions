@@ -116,6 +116,7 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     get_quantity = "SELECT quantity FROM cart_items WHERE cart_id = :cart_id"
+    get_catalog_id = "SELECT cart_items.catalog_id FROM cart_items WHERE cart_id = :cart_id"
     get_price = """SELECT price 
                    FROM catalog
                    LEFT JOIN cart_items
@@ -123,19 +124,30 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                    WHERE cart_items.cart_id = :cart_id"""
     
     with db.engine.begin() as connection:
+        catalog_id = connection.execute(sqlalchemy.text(get_catalog_id), {"cart_id": cart_id}).scalar()
         price = connection.execute(sqlalchemy.text(get_price), {"cart_id": cart_id}).scalar()
         quantity = connection.execute(sqlalchemy.text(get_quantity),{"cart_id": cart_id}).scalar()
-    payment = quantity * price
 
+    payment = quantity * price
+    num_potions_update = ""
+    
+    if(catalog_id == 1):
+        num_potions_update = "UPDATE global_inventory SET num_red_potions = num_red_potions - :quantity"
+    elif(catalog_id == 2):
+        num_potions_update = "UPDATE global_inventory SET num_green_potions = num_green_potions - :quantity"
+    elif(catalog_id == 3):
+        num_potions_update = "UPDATE global_inventory SET num_blue_potions = num_blue_potions - :quantity"
+
+    gold_update = "UPDATE global_inventory SET gold = gold + :payment"
+    remove_cart_sql = "DELETE FROM cart_items WHERE cart_id = :cart_id"
     inventory_update = """UPDATE catalog
                           SET inventory = inventory - cart_items.quantity
                           FROM cart_items
                           WHERE catalog.catalog_id = cart_items.catalog_id AND cart_items.cart_id = :cart_id"""
-    gold_update = "UPDATE global_inventory SET gold = gold + :payment"
-    remove_cart_sql = "DELETE FROM cart_items WHERE cart_id = :cart_id"
     with db.engine.begin() as connection:
+        new_num_potions = connection.execute(sqlalchemy.text(num_potions_update), {"quantity": quantity})
         new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"cart_id": cart_id})
         remove_cart = connection.execute(sqlalchemy.text(remove_cart_sql), {"cart_id": cart_id})
-        new_gold = connection.execute(sqlalchemy.text(gold_update), {"payment": payment})
+        # new_gold = connection.execute(sqlalchemy.text(gold_update), {"payment": payment})
 
     return {"total_potions_bought": quantity, "total_gold_paid": payment}
