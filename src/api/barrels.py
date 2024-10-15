@@ -81,11 +81,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     for barrel in wholesale_catalog:
 
-        total_price += barrel.price
-        total_quantity += barrel.quantity
+        if (sum(all_potions) < 10 and (gold_amount - (barrel.price * barrel.quantity)) >= 0 and gold_amount > 0):
 
-
-        if (sum(all_potions) < 10 and (gold_amount - (total_price * total_quantity)) >= 0 and gold_amount > 0):
+            total_price += barrel.price
+            total_quantity += barrel.quantity
+            gold_amount -= (total_price * total_quantity)
             
             if (min(all_potions) == num_red):
                 barrel.potion_type = [100, 0, 0, 0]
@@ -100,11 +100,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 barrel.potion_type = [100, 0, 0, 0]
                 ml_red += barrel.ml_per_barrel
 
-            plan.append({"sku": barrel.sku,
+        plan.append({"sku": barrel.sku,
             "ml_per_barrel": barrel.ml_per_barrel,
             "potion_type": barrel.potion_type,
             "quantity": barrel.quantity,
             "price": barrel.price})
+
     
     ml_update = """UPDATE global_inventory SET 
                         num_red_ml = num_red_ml + :red,
