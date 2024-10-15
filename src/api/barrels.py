@@ -112,6 +112,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                         num_green_ml = num_green_ml + :green, 
                         num_blue_ml = num_blue_ml + :blue"""
     gold_update = "UPDATE global_inventory SET gold = gold - :price"
+    print(f"Total gold paid: {total_price * total_quantity}")
     with db.engine.begin() as connection:
             new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue})
             new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price * total_quantity})
