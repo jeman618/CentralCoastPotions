@@ -145,6 +145,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                           FROM cart_items
                           WHERE catalog.catalog_id = cart_items.catalog_id AND cart_items.cart_id = :cart_id"""
     with db.engine.begin() as connection:
+        new_gold = connection.execute(sqlalchemy.text(gold_update), {"payment": payment})
         new_num_potions = connection.execute(sqlalchemy.text(num_potions_update), {"quantity": quantity})
         new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"cart_id": cart_id})
         remove_cart = connection.execute(sqlalchemy.text(remove_cart_sql), {"cart_id": cart_id})
