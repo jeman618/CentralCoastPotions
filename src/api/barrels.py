@@ -44,7 +44,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 num_white = connection.execute(sqlalchemy.text(potions_w)).scalar()
 
     gold_amount = gold
-    all_potions = [num_green, num_red, num_blue, num_white]
+    all_potions = [num_red, num_green, num_blue, num_white]
     plan = []
     total_price = 0
     total_quantity = 0
@@ -76,10 +76,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     barrel.potion_type = [0, 0, 0, 100]
                     ml_white += barrel.ml_per_barrel
 
-                else:
-                    barrel.potion_type = [100, 0, 0, 0]
-                    ml_red += barrel.ml_per_barrel
-
                 plan.append({"sku": barrel.sku,
                     "ml_per_barrel": barrel.ml_per_barrel,
                     "potion_type": barrel.potion_type,
@@ -97,7 +93,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(f"Total gold paid: {total_price}")
 
     with db.engine.begin() as connection:
-            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue, "white": ml_white})
+            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": num_red, "green": num_green, "blue": num_blue, "white": num_white})
             new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price})
             
     print(plan)

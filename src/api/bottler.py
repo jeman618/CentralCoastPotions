@@ -74,18 +74,18 @@ def get_bottle_plan():
                 })
             
     if (sum(all_ml) > 0):
-        with db.engine.begin() as connection:
-            potion_insert = """UPDATE global_inventory SET 
+        potion_insert = """UPDATE global_inventory SET 
                                     num_red_potions = num_red_potions + :red, 
                                     num_green_potions = num_green_potions + :green,
                                     num_blue_potions = num_blue_potions + :blue,
                                     num_white_potions = num_white_potions + :white,
                                     num_red_ml = num_red_ml - :ml_red, 
                                     num_green_ml = num_green_ml - :ml_green,
-                                    num_blue_ml = num_blue_ml - :ml_blue
+                                    num_blue_ml = num_blue_ml - :ml_blue,
                                     num_white_ml = num_white_ml - :ml_white"""
+        with db.engine.begin() as connection:
             ml_update = connection.execute(sqlalchemy.text(potion_insert),
-            {"red": red_p, "green": green_p, "blue": blue_p, "ml_red": num_red, "ml_green": num_green, "ml_blue": num_blue, "ml_white": num_white})
+            {"red": red_p, "green": green_p, "blue": blue_p, "white": white_p, "ml_red": num_red, "ml_green": num_green, "ml_blue": num_blue, "ml_white": num_white})
 
     # Each bottle has a quantity of what proportion of red, blue, and
     # green potion to add.
