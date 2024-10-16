@@ -13,17 +13,21 @@ def get_catalog():
     g_potions = "SELECT num_green_potions FROM global_inventory"
     r_potions = "SELECT num_red_potions FROM global_inventory"
     b_potions = "SELECT num_blue_potions FROM global_inventory"
+    w_potions = "SELECT num_white_potions FROM global_inventory"
     catalog_sql_1 = "UPDATE catalog SET inventory = :ml_r WHERE catalog_id = 1"
-    catalog_sql_2 = "UPDATE catalog SET inventory = :ml_g WHERE catalog_id = 2 "
+    catalog_sql_2 = "UPDATE catalog SET inventory = :ml_g WHERE catalog_id = 2"
     catalog_sql_3 = "UPDATE catalog SET inventory = :ml_b WHERE catalog_id = 3"
+    catalog_sql_4 = "UPDATE catalog SET inventory = :ml_w WHERE catalog_id = 4"
 
     with db.engine.begin() as connection:
         r_p = connection.execute(sqlalchemy.text(r_potions)).scalar()
         g_p = connection.execute(sqlalchemy.text(g_potions)).scalar()
         b_p = connection.execute(sqlalchemy.text(b_potions)).scalar()
+        w_p = connection.execute(sqlalchemy.text(w_potions)).scalar()
         inventory_red = connection.execute(sqlalchemy.text(catalog_sql_1), {"ml_r": r_p})
         inventory_green = connection.execute(sqlalchemy.text(catalog_sql_2), {"ml_g": g_p})
         inventory_blue = connection.execute(sqlalchemy.text(catalog_sql_3), {"ml_b": b_p})
+        inventory_white = connection.execute(sqlalchemy.text(catalog_sql_4), {"ml_w": w_p})
 
     catalog = []
     if r_p > 0:
@@ -32,15 +36,18 @@ def get_catalog():
             })
     if g_p > 0:
         catalog.append({"sku": "GREEN", "name": "green potion", "quantity": g_p,
-                "price": 40, "potion_type": [0, 100, 0, 0],
+                "price": 50, "potion_type": [0, 100, 0, 0],
             })
     if b_p > 0:
         catalog.append({"sku": "BLUE", "name": "blue potion", "quantity": b_p,
-                "price": 30, "potion_type": [0, 0, 100, 0],
+                "price": 50, "potion_type": [0, 0, 100, 0],
+            })
+    if w_p > 0:
+        catalog.append({"sku": "WHITE", "name": "white potion", "quantity": w_p,
+                "price": 50, "potion_type": [0, 0, 0, 100],
             })
         
-    
-    if g_p == 0 and r_p == 0 and b_p == 0:
+    if g_p == 0 and r_p == 0 and b_p == 0 and w_p == 0:
         print("no potions available")
         return []
     """

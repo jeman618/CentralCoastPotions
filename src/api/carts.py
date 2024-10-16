@@ -130,6 +130,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
 
     payment = quantity * price
     num_potions_update = ""
+    print(f"payment: {payment}")
     
     if(catalog_id == 1):
         num_potions_update = "UPDATE global_inventory SET num_red_potions = num_red_potions - :quantity"
@@ -137,6 +138,8 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         num_potions_update = "UPDATE global_inventory SET num_green_potions = num_green_potions - :quantity"
     elif(catalog_id == 3):
         num_potions_update = "UPDATE global_inventory SET num_blue_potions = num_blue_potions - :quantity"
+    elif(catalog_id == 4):
+        num_potions_update = "UPDATE global_inventory SET num_white_potions = num_white_potions - :quantity"
 
     gold_update = "UPDATE global_inventory SET gold = gold + :payment"
     remove_cart_sql = "DELETE FROM cart_items WHERE cart_id = :cart_id"
