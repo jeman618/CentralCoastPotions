@@ -60,6 +60,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 total_price += (barrel.price * barrel.quantity)
                 gold_amount -= total_price
                 
+                print(min(all_potions) == num_white)
                 if (min(all_potions) == num_red):
                     barrel.potion_type = [100, 0, 0, 0]
                     ml_red += barrel.ml_per_barrel
@@ -75,11 +76,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 elif(min(all_potions) == num_white):
                     barrel.potion_type = [0, 0, 0, 100]
                     ml_white += barrel.ml_per_barrel
-
                 else:
                     barrel.potion_type = [100, 0, 0, 0]
                     ml_red += barrel.ml_per_barrel
-
 
                 plan.append({"sku": barrel.sku,
                     "ml_per_barrel": barrel.ml_per_barrel,
@@ -97,8 +96,9 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     gold_update = "UPDATE global_inventory SET gold = gold - :price"
     print(f"Total gold paid: {total_price}")
 
+
     with db.engine.begin() as connection:
-            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": num_red, "green": num_green, "blue": num_blue, "white": num_white})
+            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue, "white": ml_white})
             new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price})
             
     print(plan)

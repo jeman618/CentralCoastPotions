@@ -77,16 +77,16 @@ def get_capacity_plan():
             ml_cap = 1
         with db.engine.begin() as connection:
             inventory_update = """UPDATE global_inventory SET
-                                    num_red_potions = num_red_potions + (:potion * 50),
-                                    num_green_potions = num_green_potions + (:potion * 50),
-                                    num_blue_potions = num_blue_potions + (:potion * 50),
-                                    num_white_potions = num_white_potions + (:potion * 50),
-                                    num_red_ml = num_red_ml + (:ml * 10000),
-                                    num_green_ml = num_green_ml + (:ml * 10000),
-                                    num_blue_ml = num_blue_ml + (:ml * 10000),
-                                    num_white_ml = num_white_ml + (:ml * 10000)"""
+                                    num_red_potions = num_red_potions + :potion,
+                                    num_green_potions = num_green_potions + :potion,
+                                    num_blue_potions = num_blue_potions + :potion,
+                                    num_white_potions = num_white_potions + :potion,
+                                    num_red_ml = num_red_ml + :ml,
+                                    num_green_ml = num_green_ml + :ml,
+                                    num_blue_ml = num_blue_ml + :ml,
+                                    num_white_ml = num_white_ml + :ml"""
             gold_update = "UPDATE global_inventory SET gold = gold - (1000 * :ml_cap * :p_cap)"
-            new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"potion": int(potion_cap / 4), "ml": int(ml_cap / 4)})
+            new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"potion": int((potion_cap / 4) * 50), "ml": int((ml_cap / 4) * 10000)})
             new_gold = connection.execute(sqlalchemy.text(gold_update), {"ml_cap": ml_cap, "p_cap": potion_cap})
     """ 
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
