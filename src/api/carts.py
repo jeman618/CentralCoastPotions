@@ -152,6 +152,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         new_num_potions = connection.execute(sqlalchemy.text(num_potions_update), {"quantity": quantity})
         new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"cart_id": cart_id})
         remove_cart = connection.execute(sqlalchemy.text(remove_cart_sql), {"cart_id": cart_id})
-        # new_gold = connection.execute(sqlalchemy.text(gold_update), {"payment": payment})
 
     return {"total_potions_bought": quantity, "total_gold_paid": payment}
