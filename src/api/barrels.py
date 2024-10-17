@@ -76,6 +76,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     barrel.potion_type = [0, 0, 0, 100]
                     ml_white += barrel.ml_per_barrel
 
+                else:
+                    barrel.potion_type = [100, 0, 0, 0]
+                    ml_red += barrel.ml_per_barrel
+
+
                 plan.append({"sku": barrel.sku,
                     "ml_per_barrel": barrel.ml_per_barrel,
                     "potion_type": barrel.potion_type,
