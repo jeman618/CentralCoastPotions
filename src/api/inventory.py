@@ -37,6 +37,8 @@ def get_inventory():
 
         total_p = num_p_g + num_p_r + num_p_b + num_p_w
         total_ml = num_mili_g + num_mili_r + num_mili_b + num_mili_w
+
+        print(f"number_of_potions: {total_p} ml_in_barrels: {total_ml} gold: {gold}")
     
     return {"number_of_potions": total_p, "ml_in_barrels": total_ml, "gold": gold}
 
