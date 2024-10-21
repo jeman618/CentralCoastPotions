@@ -19,9 +19,11 @@ def reset():
                                                 green_ml = 0,
                                                 blue_ml = 0,
                                                 dark_ml = 0"""
+    reset_cart_sql = "DELETE FROM cart"
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(reset_potions_sql))
         connection.execute(sqlalchemy.text(reset_gl_sql))
+        connection.execute(sqlalchemy.text(reset_cart_sql))
     """
     Reset the game state. Gold goes to 100, all potions are removed from
     inventory, and all barrels are removed from inventory. Carts are all reset.
