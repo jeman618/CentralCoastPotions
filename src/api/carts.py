@@ -144,6 +144,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
                           SET inventory = inventory - cart_items.quantity
                           FROM cart_items
                           WHERE catalog.catalog_id = cart_items.catalog_id AND cart_items.cart_id = :cart_id"""
+    
     with db.engine.begin() as connection:
         new_gold = connection.execute(sqlalchemy.text(gold_update), {"payment": payment})
         new_inventory = connection.execute(sqlalchemy.text(inventory_update), {"cart_id": cart_id})

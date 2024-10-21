@@ -21,7 +21,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     deliver_sql = """UPDATE catalog SET 
                         inventory = inventory + :quantity
                         WHERE potion_type = :potion_type"""
-    
     ml_sql = """UPDATE global_inventory SET red_ml = red_ml - :red,
                                             green_ml = green_ml - :green,
                                             blue_ml = blue_ml - :blue,

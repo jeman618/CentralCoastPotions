@@ -16,7 +16,6 @@ def get_catalog():
         catalog_list = connection.execute(sqlalchemy.text(catalog_sql)).fetchall()
 
     potion_inventory = 0
-    x = 0
     catalog = []
 
     for item in catalog_list:
@@ -26,7 +25,6 @@ def get_catalog():
             catalog.append({"sku": item[0], "name": item[1], "quantity": potion_inventory,
                 "price": item[4], "potion_type": item[3],
             })
-        x += 1  
         
     if len(catalog) == 0:
         print("no potions available")
