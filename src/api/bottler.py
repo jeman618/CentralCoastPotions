@@ -33,14 +33,14 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     with db.engine.begin() as connection:
 
         for new_potions in potions_delivered:
-            red = new_potions.potion_type[0] * new_potions.quantity
-            green = new_potions.potion_type[1] * new_potions.quantity
-            blue = new_potions.potion_type[2] * new_potions.quantity
-            dark = new_potions.potion_type[3] * new_potions.quantity
+            red = new_potions.potion_type[0] * new_potions.quantity * 100
+            green = new_potions.potion_type[1] * new_potions.quantity * 100
+            blue = new_potions.potion_type[2] * new_potions.quantity * 100
+            dark = new_potions.potion_type[3] * new_potions.quantity * 100
 
             connection.execute(sqlalchemy.text(deliver_sql), {"quantity": new_potions.quantity,
                                                               "potion_type": new_potions.potion_type})
-            connection.execute(sqlalchemy.text(ml_sql), {"red": red, "green": green, "blue": blue, "dark": dark})
+        connection.execute(sqlalchemy.text(ml_sql), {"red": red, "green": green, "blue": blue, "dark": dark})
     """ """ 
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
     return "OK"

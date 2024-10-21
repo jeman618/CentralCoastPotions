@@ -31,10 +31,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     for barrel_delivered in barrels_delivered:
           
           total_price += (barrel_delivered.price * barrel_delivered.quantity)
-          red += (barrel_delivered.potion_type[0] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
-          green += (barrel_delivered.potion_type[1] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
-          blue += (barrel_delivered.potion_type[2] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
-          dark += (barrel_delivered.potion_type[3] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
+          red += barrel_delivered.potion_type[0] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel
+          green += barrel_delivered.potion_type[1] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel
+          blue += barrel_delivered.potion_type[2] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel
+          dark += barrel_delivered.potion_type[3] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel
         
     update_sql = """UPDATE global_inventory SET red_ml = red_ml + :red,
                                             green_ml = green_ml + :green,
