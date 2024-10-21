@@ -69,20 +69,21 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     total_price = 0
 
     if(potion_inventory < 10):
+        
         for barrel in wholesale_catalog:
-              for possible_types in types:
-                    if (gold_amount - (barrel.price * barrel.quantity) > 0):
-                        
-                          total_price += (barrel.price * barrel.quantity)
-                          gold_amount -= total_price
-                          barrel.potion_type = possible_types[0]
-                          plan.append({"sku": barrel.sku,
-                                        "ml_per_barrel": barrel.ml_per_barrel,
-                                        "potion_type": barrel.potion_type,
-                                        "quantity": barrel.quantity,
-                                        "price": barrel.price})
+            if (gold_amount - (barrel.price * barrel.quantity) > 0):
+                    print(barrel)
+                
+                    total_price += (barrel.price * barrel.quantity)
+                    gold_amount -= total_price
+                    plan.append({"sku": barrel.sku,
+                                "ml_per_barrel": barrel.ml_per_barrel,
+                                "potion_type": barrel.potion_type,
+                                "quantity": barrel.quantity,
+                                "price": barrel.price})
                           
     print(f"Total gold paid: {total_price}")
+    print(plan)
     return plan
         
     
