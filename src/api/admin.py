@@ -19,7 +19,7 @@ def reset():
                                                 green_ml = 0,
                                                 blue_ml = 0,
                                                 dark_ml = 0"""
-    reset_cart_sql = "DELETE FROM cart"
+    reset_cart_sql = "DELETE * FROM cart"
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(reset_potions_sql))
         connection.execute(sqlalchemy.text(reset_gl_sql))

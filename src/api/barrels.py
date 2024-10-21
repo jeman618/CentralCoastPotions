@@ -56,7 +56,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]): 
 
     gold_SQL = "SELECT gold FROM global_inventory"
-    types_SQL = "SELECT potion_type FROM catalog ORDER BY catalog_id"
+    types_SQL = "SELECT potion_type FROM catalog"
     p_inventory_SQL = "SELECT SUM(inventory) FROM catalog"
 
     with db.engine.begin() as connection:
