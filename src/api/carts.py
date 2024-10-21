@@ -87,9 +87,16 @@ def post_visits(visit_id: int, customers: list[Customer]):
 
 @router.post("/")
 def create_cart(new_cart: Customer):
+
+    new_customer = """INSERT INTO cart (customer_name, character_class, level)
+                                    VALUES(:name, :class, :level) RETURNING id"""
+    with db.engine.begin() as connection:
+        new_cart_id = connection.execute(sqlalchemy.text(new_customer), {"name": new_cart.customer_name, "class": new_cart.character_class, "level": new_cart.level}).scalar()
+    
     print(new_cart)
+
     """ """
-    return {"cart_id": 1}
+    return {"cart_id": new_cart_id}
 
 
 class CartItem(BaseModel):

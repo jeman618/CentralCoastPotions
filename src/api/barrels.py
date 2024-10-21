@@ -21,7 +21,32 @@ class Barrel(BaseModel):
 
 @router.post("/deliver/{order_id}")
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
-    """ """
+    """ """    
+    red = 0
+    green = 0
+    blue = 0
+    dark = 0
+    total_price = 0
+
+    for barrel_delivered in barrels_delivered:
+          
+          total_price += (barrel_delivered.price * barrel_delivered.quantity)
+          red += (barrel_delivered.potion_type[0] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
+          green += (barrel_delivered.potion_type[1] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
+          blue += (barrel_delivered.potion_type[2] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
+          dark += (barrel_delivered.potion_type[3] * barrel_delivered.quantity * barrel_delivered.ml_per_barrel) / 100
+        
+    update_sql = """UPDATE global_inventory SET red_ml = red_ml + :red,
+                                            green_ml = green_ml + :green,
+                                            blue_ml = blue_ml + :blue,
+                                            dark_ml = dark_ml + :dark,
+                                            gold = gold - :payment"""
+    
+    print(total_price)
+    with db.engine.begin() as connection:
+        update = connection.execute(sqlalchemy.text(update_sql), 
+                                    {"red": red, "green": green, "blue": blue, "dark": dark, "payment": total_price})
+
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
     return "OK"
@@ -31,78 +56,33 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]): 
 
     gold_SQL = "SELECT gold FROM global_inventory"
-    potions_g = "SELECT num_green_potions FROM global_inventory"
-    potions_r = "SELECT num_red_potions FROM global_inventory"
-    potions_b = "SELECT num_blue_potions FROM global_inventory"
-    potions_w = "SELECT num_white_potions FROM global_inventory"
+    types_SQL = "SELECT potion_type FROM catalog ORDER BY catalog_id"
+    p_inventory_SQL = "SELECT SUM(inventory) FROM catalog"
 
     with db.engine.begin() as connection:
                 gold = connection.execute(sqlalchemy.text(gold_SQL)).scalar()
-                num_green = connection.execute(sqlalchemy.text(potions_g)).scalar()
-                num_red = connection.execute(sqlalchemy.text(potions_r)).scalar()
-                num_blue = connection.execute(sqlalchemy.text(potions_b)).scalar()
-                num_white = connection.execute(sqlalchemy.text(potions_w)).scalar()
+                types = connection.execute(sqlalchemy.text(types_SQL)).all()
+                potion_inventory = connection.execute(sqlalchemy.text(p_inventory_SQL)).scalar()
 
     gold_amount = gold
-    all_potions = [num_red, num_green, num_blue, num_white]
     plan = []
     total_price = 0
-    total_quantity = 0
-    ml_red = 0
-    ml_green = 0
-    ml_blue = 0
-    ml_white = 0
 
-    if (sum(all_potions) < 10):
+    if(potion_inventory < 10):
         for barrel in wholesale_catalog:
-            if (gold_amount - (barrel.price * barrel.quantity) > 0 and gold_amount > 0):
-
-                total_price += (barrel.price * barrel.quantity)
-                gold_amount -= total_price
-                
-                print(min(all_potions) == num_white)
-                if (min(all_potions) == num_red):
-                    barrel.potion_type = [100, 0, 0, 0]
-                    ml_red += barrel.ml_per_barrel
-
-                elif(min(all_potions) == num_green):
-                    barrel.potion_type = [0, 100, 0, 0]
-                    ml_green += barrel.ml_per_barrel
-
-                elif(min(all_potions) == num_blue):
-                    barrel.potion_type = [0, 0, 100, 0]
-                    ml_blue += barrel.ml_per_barrel
-
-                elif(min(all_potions) == num_white):
-                    barrel.potion_type = [0, 0, 0, 100]
-                    ml_white += barrel.ml_per_barrel
-                else:
-                    barrel.potion_type = [100, 0, 0, 0]
-                    ml_red += barrel.ml_per_barrel
-
-                plan.append({"sku": barrel.sku,
-                    "ml_per_barrel": barrel.ml_per_barrel,
-                    "potion_type": barrel.potion_type,
-                    "quantity": barrel.quantity,
-                    "price": barrel.price})
-
-    
-    ml_update = """UPDATE global_inventory SET 
-                        num_red_ml = num_red_ml + :red,
-                        num_green_ml = num_green_ml + :green, 
-                        num_blue_ml = num_blue_ml + :blue,
-                        num_white_ml = num_white_ml + :white"""
-    
-    gold_update = "UPDATE global_inventory SET gold = gold - :price"
+              for possible_types in types:
+                    if (gold_amount - (barrel.price * barrel.quantity) > 0):
+                        
+                          total_price += (barrel.price * barrel.quantity)
+                          gold_amount -= total_price
+                          barrel.potion_type = possible_types[0]
+                          plan.append({"sku": barrel.sku,
+                                        "ml_per_barrel": barrel.ml_per_barrel,
+                                        "potion_type": barrel.potion_type,
+                                        "quantity": barrel.quantity,
+                                        "price": barrel.price})
+                          
     print(f"Total gold paid: {total_price}")
-
-
-    with db.engine.begin() as connection:
-            new_ml = connection.execute(sqlalchemy.text(ml_update),{"red": ml_red, "green": ml_green, "blue": ml_blue, "white": ml_white})
-            new_gold = connection.execute(sqlalchemy.text(gold_update),{"price": total_price})
-            
-    print(plan)
-            
     return plan
         
     

@@ -18,80 +18,52 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
 
+    deliver_sql = """UPDATE catalog SET 
+                        inventory = inventory + :quantity
+                        WHERE potion_type = :potion_type"""
+    
+    ml_sql = """UPDATE global_inventory SET red_ml = red_ml - :red,
+                                            green_ml = green_ml - :green,
+                                            blue_ml = blue_ml - :blue,
+                                            dark_ml = dark_ml - :dark"""
+    red = 0
+    green = 0
+    blue = 0
+    dark = 0
+    with db.engine.begin() as connection:
+
+        for new_potions in potions_delivered:
+            red = new_potions.potion_type[0] * new_potions.quantity
+            green = new_potions.potion_type[1] * new_potions.quantity
+            blue = new_potions.potion_type[2] * new_potions.quantity
+            dark = new_potions.potion_type[3] * new_potions.quantity
+
+            connection.execute(sqlalchemy.text(deliver_sql), {"quantity": new_potions.quantity,
+                                                              "potion_type": new_potions.potion_type})
+            connection.execute(sqlalchemy.text(ml_sql), {"red": red, "green": green, "blue": blue, "dark": dark})
     """ """ 
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
-
     return "OK"
 
 @router.post("/plan")
 def get_bottle_plan():
 
-    ml_r = "SELECT num_red_ml FROM global_inventory"
-    ml_g = "SELECT num_green_ml FROM global_inventory"
-    ml_b = "SELECT num_blue_ml FROM global_inventory"
-    ml_w = "SELECT num_white_ml FROM global_inventory"
-
-
+    possible_potions_sql = "SELECT sku, inventory, potion_type FROM catalog ORDER BY catalog_id ASC"
+    ml_sql = "SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory"
     with db.engine.begin() as connection:
-        num_red = connection.execute(sqlalchemy.text(ml_r)).scalar()
-        num_green = connection.execute(sqlalchemy.text(ml_g)).scalar()
-        num_blue = connection.execute(sqlalchemy.text(ml_b)).scalar()
-        num_white = connection.execute(sqlalchemy.text(ml_w)).scalar()
+        possible_potions = connection.execute(sqlalchemy.text(possible_potions_sql)).all()
+        ml_total = connection.execute(sqlalchemy.text(ml_sql)).fetchone()
 
-    all_ml = [num_red, num_green, num_blue, num_white]
-    red_p = 0
-    green_p = 0
-    blue_p = 0
-    white_p = 0
-    """
-    Go from barrel to bottle.
-    """
-    List = [PotionInventory(potion_type = [0,0,0,0], quantity = 0)]
+    ml_total = list(ml_total)
     plan = []
-
-    if (sum(all_ml) > 0):
-        for bottle in List:
-            if (num_red > 0):
-                red_p = int(num_red/100)
-                bottle.potion_type = [100, 0, 0, 0]
-                bottle.quantity = red_p
-            if(num_green > 0):
-                green_p= int(num_green/100)
-                bottle.potion_type = [0, 100, 0, 0]
-                bottle.quantity = green_p
-            if (num_blue > 0):
-                blue_p = int(num_blue/100)
-                bottle.potion_type = [0, 0, 100, 0]
-                bottle.quantity = blue_p
-            if (num_white > 0):
-                white_p = int(num_white/100)
-                bottle.potion_type = [0, 0, 0, 100]
-                bottle.quantity = white_p
-
-            plan.append({
-                "potion_type": bottle.potion_type,
-                "quantity": bottle.quantity,
-                })
-            
-    if (sum(all_ml) > 0):
-        potion_insert = """UPDATE global_inventory SET 
-                                    num_red_potions = num_red_potions + :red, 
-                                    num_green_potions = num_green_potions + :green,
-                                    num_blue_potions = num_blue_potions + :blue,
-                                    num_white_potions = num_white_potions + :white,
-                                    num_red_ml = num_red_ml - :ml_red, 
-                                    num_green_ml = num_green_ml - :ml_green,
-                                    num_blue_ml = num_blue_ml - :ml_blue,
-                                    num_white_ml = num_white_ml - :ml_white"""
-        with db.engine.begin() as connection:
-            ml_update = connection.execute(sqlalchemy.text(potion_insert),
-            {"red": red_p, "green": green_p, "blue": blue_p, "white": white_p, "ml_red": num_red, "ml_green": num_green, "ml_blue": num_blue, "ml_white": num_white})
-
-    # Each bottle has a quantity of what proportion of red, blue, and
-    # green potion to add.
-    # Expressed in integers from 1 to 100 that must sum up to 100.
-
-    # Initial logic: bottle all barrels into red potions.
+    x = 0
+    if (sum(ml_total) > 0):
+        for possible_potion in possible_potions:
+            if (ml_total[x] > 0):
+                quantity = int(ml_total[x]/100)
+                potion_type = possible_potion[2]
+                plan.append({"potion_type": potion_type, "quantity": quantity})
+            x += 1
     print(plan)
     return plan
 
