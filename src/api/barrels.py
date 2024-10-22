@@ -67,33 +67,41 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 ml = connection.execute(sqlalchemy.text(ml_SQL)).fetchone()
 
     ml = list(ml)
+    print(ml)
     gold_amount = gold
     plan = []
     total_price = 0
 
     if(potion_inventory < 10):
         for barrel in wholesale_catalog:
+            print(barrel)
             if (gold_amount - (barrel.price * barrel.quantity) > 0):
-                    print(barrel)
+                    
                     total_price += (barrel.price * barrel.quantity)
                     gold_amount -= total_price
-                    if (min(ml) == ml[0] and barrel.potion_type == [1,0,0,0]):
-                        barrel.potion_type = [1,0,0,0]
-                        ml[0] += barrel.ml_per_barrel
-                    elif (min(ml) == ml[1] and barrel.potion_type == [0,1,0,0]):
-                        ml[1] += barrel.ml_per_barrel
-                    elif (min(ml) == ml[2] and barrel.potion_type == [0,0,1,0]):
-                        ml[2] += barrel.ml_per_barrel
-                    elif (min(ml) == ml[3] and barrel.potion_type == [0,0,0,1]):
+                    if (min(ml) == ml[3]):
+                        barrel.potion_type = [0,0,0,1]
                         ml[3] += barrel.ml_per_barrel
+                    elif (min(ml) == ml[2]):
+                        ml[2] += barrel.ml_per_barrel
+                        barrel.potion_type = [0,0,1,0]
+                    elif (min(ml) == ml[1]):
+                        ml[1] += barrel.ml_per_barrel
+                        barrel.potion_type = [0,1,0,0]
+                    elif (min(ml) == ml[0]):
+                        ml[0] += barrel.ml_per_barrel
+                        barrel.potion_type = [1,0,0,0]
                     else:
-                         ml[0] += barrel.ml_per_barrel 
-                    
+                        ml[3] += barrel.ml_per_barrel 
+                        barrel.potion_type = [0,0,0,1]
+
                     plan.append({"sku": barrel.sku,
                                 "ml_per_barrel": barrel.ml_per_barrel,
                                 "potion_type": barrel.potion_type,
                                 "quantity": barrel.quantity,
                                 "price": barrel.price})
+                    
+                    
                     
                           
     print(f"Total gold paid: {total_price}")
