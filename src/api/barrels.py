@@ -62,7 +62,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
 
     with db.engine.begin() as connection:
                 gold = connection.execute(sqlalchemy.text(gold_SQL)).scalar()
-                types = connection.execute(sqlalchemy.text(types_SQL)).all()
                 potion_inventory = connection.execute(sqlalchemy.text(p_inventory_SQL)).scalar()
                 ml = connection.execute(sqlalchemy.text(ml_SQL)).fetchone()
 
@@ -79,31 +78,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     
                     total_price += (barrel.price * barrel.quantity)
                     gold_amount -= total_price
-                    if (min(ml) == ml[3]):
-                        barrel.potion_type = [0,0,0,1]
+                    if (min(ml) == ml[3] and barrel.potion_type == [0,0,0,1]):
                         ml[3] += barrel.ml_per_barrel
-                    elif (min(ml) == ml[2]):
+                    elif (min(ml) == ml[2] and barrel.potion_type == [0,0,1,0]):
                         ml[2] += barrel.ml_per_barrel
-                        barrel.potion_type = [0,0,1,0]
-                    elif (min(ml) == ml[1]):
+                    elif (min(ml) == ml[1] and barrel.potion_type == [0,1,0,0]):
                         ml[1] += barrel.ml_per_barrel
-                        barrel.potion_type = [0,1,0,0]
-                    elif (min(ml) == ml[0]):
+                    elif (min(ml) == ml[0] and barrel.potion_type == [1,0,0,0]):
                         ml[0] += barrel.ml_per_barrel
-                        barrel.potion_type = [1,0,0,0]
                     else:
-                        ml[3] += barrel.ml_per_barrel 
-                        barrel.potion_type = [0,0,0,1]
+                        ml[0] += barrel.ml_per_barrel 
 
                     plan.append({"sku": barrel.sku,
                                 "ml_per_barrel": barrel.ml_per_barrel,
                                 "potion_type": barrel.potion_type,
                                 "quantity": barrel.quantity,
                                 "price": barrel.price})
-                    
-                    
-                    
-                          
+                                
     print(f"Total gold paid: {total_price}")
     print(plan)
     return plan

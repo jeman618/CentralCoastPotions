@@ -33,10 +33,12 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 
         for new_potions in potions_delivered:
 
+            print(new_potions)
             red += new_potions.potion_type[0] * new_potions.quantity 
             green += new_potions.potion_type[1] * new_potions.quantity
             blue += new_potions.potion_type[2] * new_potions.quantity 
             dark += new_potions.potion_type[3] * new_potions.quantity 
+
             connection.execute(sqlalchemy.text(deliver_sql), {"quantity": new_potions.quantity,
                                                               "potion_type": new_potions.potion_type})
             
@@ -48,22 +50,35 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
 @router.post("/plan")
 def get_bottle_plan():
 
-    possible_potions_sql = "SELECT sku, inventory, potion_type FROM catalog ORDER BY catalog_id ASC"
+    all_potions_sql = "SELECT sku, inventory, potion_type FROM catalog ORDER BY catalog_id DESC"
     ml_sql = "SELECT red_ml, green_ml, blue_ml, dark_ml FROM global_inventory"
     with db.engine.begin() as connection:
-        possible_potions = connection.execute(sqlalchemy.text(possible_potions_sql)).all()
+        all_potions = connection.execute(sqlalchemy.text(all_potions_sql)).all()
         ml_total = connection.execute(sqlalchemy.text(ml_sql)).fetchone()
 
     ml_total = list(ml_total)
+    print(ml_total)
     plan = []
-    x = 0
     if (sum(ml_total) > 0):
-        for possible_potion in possible_potions:
-            if (ml_total[x] > 0):
-                quantity = int(ml_total[x]/100)
-                potion_type = possible_potion[2]
+
+        for possible_potion in all_potions:
+
+            potion_type = possible_potion[2]
+            # print(potion_type)
+
+            if (potion_type[0] <= ml_total[0] and potion_type[1] <= ml_total[1] 
+                and potion_type[2] <= ml_total[2] and potion_type[3] <= ml_total[3]):
+                
+                quantity = int ((ml_total[0] * potion_type[0])/10000 + (ml_total[1] * potion_type[1])/10000
+                                + (ml_total[2] * potion_type[2])/10000 + (ml_total[3] * potion_type[3])/10000)
+                
+                ml_total[0] -= potion_type[0]
+                ml_total[1] -= potion_type[1]
+                ml_total[2] -= potion_type[2]
+                ml_total[3] -= potion_type[3]
+                
                 plan.append({"potion_type": potion_type, "quantity": quantity})
-            x += 1
+
     print(plan)
     return plan
 
